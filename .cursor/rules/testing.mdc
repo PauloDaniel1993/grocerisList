@@ -1,0 +1,11 @@
+---
+description: Testing expectations
+alwaysApply: true
+---
+
+# Testing Rules
+
+- Add or update tests when a test setup already exists.
+- Test user-visible behavior rather than implementation details.
+- For form behavior, test validation and successful submission.
+- For filtering, test the visible results.

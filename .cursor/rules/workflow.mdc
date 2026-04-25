@@ -1,0 +1,14 @@
+---
+description: Sliced development workflow
+alwaysApply: true
+---
+
+# Workflow Rules
+
+- Work one slice at a time.
+- Use `docs/03-slices` as the source of truth for feature scope.
+- Do not implement future slices unless explicitly asked.
+- Do not refactor unrelated code.
+- Prefer small, reviewable changes.
+- Before large edits, summarize the intended files.
+- After implementation, list tests to run.

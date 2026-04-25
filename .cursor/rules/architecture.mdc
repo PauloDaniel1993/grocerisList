@@ -1,0 +1,14 @@
+---
+description: Groceries app architecture rules
+alwaysApply: true
+---
+
+# Architecture Rules
+
+- Follow `docs/02-architecture/architecture-summary.md`.
+- Follow `docs/02-architecture/decisions.md`.
+- MVP is client-side and back end side.
+- Do not introduce a backend, database, authentication, or global state library unless a slice explicitly requires it.
+- Keep components small and readable.
+- Prefer accessible native controls.
+- by the end, update a central file with contracts that the feature needs in a backend
