@@ -83,3 +83,48 @@ type User = {
 ## Response style (errors)
 
 `error` is a short, human-readable string suitable for inline form or toast messages when appropriate.
+
+## Grocery contracts (planned)
+
+Slices 001–004 are implemented entirely on the client (hardcoded sample data in Slice 001, then in-memory state). Slice 005 adds local storage persistence. These endpoints are not implemented yet; they document the contract a future backend slice would expose so the client can migrate without reshaping data.
+
+### `GroceryItem` in responses
+
+```ts
+type GroceryItem = {
+  id: string
+  name: string
+  category: "produce" | "dairy" | "bakery" | "frozen" | "household" | "other"
+  bought: boolean
+  createdAt: string
+}
+```
+
+All grocery endpoints below require an authenticated session (same session cookie as Slice 000). Unauthenticated requests return `401 { "error": string }`.
+
+### `GET /api/groceries`
+
+- Used by Slice 001 (view list) once a backend exists.
+- Success `200`: `{ "items": GroceryItem[] }`
+
+### `POST /api/groceries`
+
+- Used by Slice 002 (add item).
+- Request: `{ "name": string, "category": GroceryItem["category"] }`
+- Success `201`: `{ "item": GroceryItem }` (server assigns `id`, `bought: false`, `createdAt`)
+- Error `400`: `{ "error": string }` (e.g. missing or invalid name/category)
+
+### `PATCH /api/groceries/:itemId`
+
+- Used by Slice 003 (mark bought / unbought) and later edits.
+- Request: `{ "bought"?: boolean, "name"?: string, "category"?: GroceryItem["category"] }` (at least one field)
+- Success `200`: `{ "item": GroceryItem }`
+- Error `400` / `404`: `{ "error": string }`
+
+### `DELETE /api/groceries/:itemId`
+
+- Used by a future delete interaction.
+- Success `204`: no body
+- Error `404`: `{ "error": string }`
+
+Filtering (Slice 004) is done client-side over the full list; no dedicated filter endpoint is planned.

@@ -9,8 +9,9 @@
 
 ## Backend
 
-- No backend in the MVP
-- Local storage is used in Slice 005
+- Slice 000 introduces a Node + Express API with Prisma + SQLite for auth/session and user management (see ADR 004 in `decisions.md`).
+- Grocery slices (001–004) stay client-side: hardcoded sample data, in-memory state, no grocery endpoints yet.
+- Slice 005 introduces local storage persistence on the client. Backend persistence for groceries is a future enhancement (see planned contracts in `api-design.md`).
 
 ## Data model
 
