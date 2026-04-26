@@ -6,6 +6,7 @@ import { RequireAuth } from "./components/RequireAuth";
 import { AdminUserEditPage } from "./pages/AdminUserEditPage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
 import { LoginPage } from "./pages/LoginPage";
+import { GroceriesPage } from "./pages/GroceriesPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { RootRedirect } from "./pages/RootRedirect";
 import { useAuthStore } from "./stores/authStore";
@@ -25,6 +26,7 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
+          <Route path="/groceries" element={<GroceriesPage />} />
           <Route path="/account/profile" element={<ProfilePage />} />
           <Route
             path="/admin/users"
