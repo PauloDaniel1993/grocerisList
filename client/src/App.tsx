@@ -6,6 +6,7 @@ import { RequireAuth } from "./components/RequireAuth";
 import { AdminUserEditPage } from "./pages/AdminUserEditPage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
 import { LoginPage } from "./pages/LoginPage";
+import { GroceryListsPage } from "./pages/GroceryListsPage";
 import { GroceriesPage } from "./pages/GroceriesPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { RootRedirect } from "./pages/RootRedirect";
@@ -26,7 +27,9 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
-          <Route path="/groceries" element={<GroceriesPage />} />
+          <Route path="/grocery-lists" element={<GroceryListsPage />} />
+          <Route path="/grocery-lists/:listId" element={<GroceriesPage />} />
+          <Route path="/groceries" element={<Navigate to="/grocery-lists" replace />} />
           <Route path="/account/profile" element={<ProfilePage />} />
           <Route
             path="/admin/users"

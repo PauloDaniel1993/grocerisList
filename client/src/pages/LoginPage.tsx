@@ -24,7 +24,7 @@ export function LoginPage() {
 
   useEffect(() => {
     if (status === "ready" && user) {
-      navigate(from ?? "/account/profile", { replace: true });
+      navigate(from ?? "/grocery-lists", { replace: true });
     }
   }, [user, status, navigate, from]);
 
@@ -46,7 +46,7 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       await login(em, password);
-      navigate(from ?? "/account/profile", { replace: true });
+      navigate(from ?? "/grocery-lists", { replace: true });
     } catch (err) {
       setFormError(
         err instanceof Error ? err.message : "Invalid email or password"

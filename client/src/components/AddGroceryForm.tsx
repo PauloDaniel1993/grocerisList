@@ -12,7 +12,7 @@ const nameErrorId = "grocery-name-error";
 const defaultCategory: GroceryCategory = "other";
 
 type AddGroceryFormProps = {
-  onAdd: (input: NewGroceryItemInput) => void;
+  onAdd: (input: NewGroceryItemInput) => void | Promise<void>;
 };
 
 export function AddGroceryForm({ onAdd }: AddGroceryFormProps) {
@@ -23,7 +23,7 @@ export function AddGroceryForm({ onAdd }: AddGroceryFormProps) {
   const categoryId = useId();
   const nameInputRef = useRef<HTMLInputElement | null>(null);
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setNameError(null);
     const trimmed = name.trim();
@@ -31,7 +31,7 @@ export function AddGroceryForm({ onAdd }: AddGroceryFormProps) {
       setNameError("Name is required");
       return;
     }
-    onAdd({ name: trimmed, category });
+    await onAdd({ name: trimmed, category });
     setName("");
     setCategory(defaultCategory);
     nameInputRef.current?.focus();

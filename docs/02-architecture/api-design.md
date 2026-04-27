@@ -84,15 +84,23 @@ type User = {
 
 `error` is a short, human-readable string suitable for inline form or toast messages when appropriate.
 
-## Grocery contracts (planned)
+## Grocery contracts (Slice 006 — list-scoped)
 
-Slices 001–004 are implemented entirely on the client (hardcoded sample data in Slice 001, then in-memory state). Slice 005 adds local storage persistence. These endpoints are not implemented yet; they document the contract a future backend slice would expose so the client can migrate without reshaping data.
+All endpoints below require an authenticated session (same session cookie as Slice 000). Unauthenticated requests return `401 { "error": string }`. Each list belongs to the signed-in user; accessing another user’s list id returns `404 { "error": string }` (not `403`, to avoid leaking existence).
 
-### `GroceryItem` in responses
+### Types
 
 ```ts
+type GroceryList = {
+  id: string
+  name: string
+  createdAt: string
+  updatedAt: string
+}
+
 type GroceryItem = {
   id: string
+  listId: string
   name: string
   category: "produce" | "dairy" | "bakery" | "frozen" | "household" | "other"
   bought: boolean
@@ -100,31 +108,51 @@ type GroceryItem = {
 }
 ```
 
-All grocery endpoints below require an authenticated session (same session cookie as Slice 000). Unauthenticated requests return `401 { "error": string }`.
+### `GET /api/grocery-lists`
 
-### `GET /api/groceries`
+- Success `200`: `{ "lists": GroceryList[] }` (newest first)
 
-- Used by Slice 001 (view list) once a backend exists.
+### `POST /api/grocery-lists`
+
+- Request: `{ "name": string }` (non-empty after trim; max length enforced server-side)
+- Success `201`: `{ "list": GroceryList }`
+- Error `400`: `{ "error": string }`
+
+### `GET /api/grocery-lists/:listId`
+
+- Success `200`: `{ "list": GroceryList }`
+- Error `404`: `{ "error": string }`
+
+### `DELETE /api/grocery-lists/:listId`
+
+- Deletes the list and all of its items (cascade).
+- Success `204`: no body
+- Error `404`: `{ "error": string }`
+
+### `GET /api/grocery-lists/:listId/items`
+
 - Success `200`: `{ "items": GroceryItem[] }`
+- Error `404`: `{ "error": string }`
 
-### `POST /api/groceries`
+### `POST /api/grocery-lists/:listId/items`
 
-- Used by Slice 002 (add item).
 - Request: `{ "name": string, "category": GroceryItem["category"] }`
-- Success `201`: `{ "item": GroceryItem }` (server assigns `id`, `bought: false`, `createdAt`)
-- Error `400`: `{ "error": string }` (e.g. missing or invalid name/category)
+- Success `201`: `{ "item": GroceryItem }`
+- Error `400` / `404`: `{ "error": string }`
 
-### `PATCH /api/groceries/:itemId`
+### `PATCH /api/grocery-lists/:listId/items/:itemId`
 
-- Used by Slice 003 (mark bought / unbought) and later edits.
 - Request: `{ "bought"?: boolean, "name"?: string, "category"?: GroceryItem["category"] }` (at least one field)
 - Success `200`: `{ "item": GroceryItem }`
 - Error `400` / `404`: `{ "error": string }`
 
-### `DELETE /api/groceries/:itemId`
+### `DELETE /api/grocery-lists/:listId/items/:itemId`
 
-- Used by a future delete interaction.
 - Success `204`: no body
 - Error `404`: `{ "error": string }`
 
-Filtering (Slice 004) is done client-side over the full list; no dedicated filter endpoint is planned.
+Filtering (Slice 004) stays client-side over the loaded items; there is no filter query parameter.
+
+### Legacy (not implemented)
+
+The earlier flat `/api/groceries` contract was superseded by list-scoped routes above.

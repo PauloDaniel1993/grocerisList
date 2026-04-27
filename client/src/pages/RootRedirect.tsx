@@ -8,7 +8,7 @@ export function RootRedirect() {
     return <p>Loading</p>;
   }
   if (user) {
-    return <Navigate to="/account/profile" replace />;
+    return <Navigate to="/grocery-lists" replace />;
   }
   return <Navigate to="/login" replace />;
 }

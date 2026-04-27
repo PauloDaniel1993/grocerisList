@@ -22,6 +22,9 @@ const baseAdmin = {
 export { baseUser, baseAdmin };
 
 export const server = setupServer(
+  http.get("/api/grocery-lists", () => {
+    return HttpResponse.json({ lists: [] });
+  }),
   http.get("/api/users/me", () => {
     return HttpResponse.json({ error: "Unauthorized" }, { status: 401 });
   }),

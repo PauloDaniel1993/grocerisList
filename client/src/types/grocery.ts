@@ -8,6 +8,7 @@ export type GroceryCategory =
 
 export type GroceryItem = {
   id: string;
+  listId: string;
   name: string;
   category: GroceryCategory;
   bought: boolean;

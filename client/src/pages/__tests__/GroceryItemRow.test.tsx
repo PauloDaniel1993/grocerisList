@@ -6,6 +6,7 @@ import type { GroceryItem } from "../../types/grocery";
 
 const baseItem: GroceryItem = {
   id: "test-1",
+  listId: "l1",
   name: "Eggs",
   category: "dairy",
   bought: false,

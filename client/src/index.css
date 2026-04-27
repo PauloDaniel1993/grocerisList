@@ -314,3 +314,59 @@ th {
 .grocery-row--bought .grocery-category {
   color: #a8a29e;
 }
+
+.grocery-lists__create {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.grocery-lists__create input[type="text"] {
+  min-width: 12rem;
+}
+
+.grocery-lists__list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  border: 1px solid #e7e5e4;
+  border-radius: 0.25rem;
+}
+
+.grocery-lists__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid #e7e5e4;
+}
+
+.grocery-lists__row:last-child {
+  border-bottom: 0;
+}
+
+.grocery-lists__link {
+  font-weight: 600;
+  text-decoration: none;
+  color: #1d4ed8;
+}
+
+.grocery-lists__link:hover {
+  text-decoration: underline;
+}
+
+.grocery-lists__delete {
+  font-size: 0.9rem;
+}
+
+.grocery-list__back {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.grocery-list__back a {
+  color: #1d4ed8;
+}

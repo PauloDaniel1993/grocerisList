@@ -4,6 +4,7 @@ import { filterGroceries } from "../filterGroceries";
 
 const a: GroceryItem = {
   id: "1",
+  listId: "l1",
   name: "A",
   category: "other",
   bought: false,
@@ -11,6 +12,7 @@ const a: GroceryItem = {
 };
 const b: GroceryItem = {
   id: "2",
+  listId: "l1",
   name: "B",
   category: "other",
   bought: true,
