@@ -14,7 +14,7 @@ export function AppLayout() {
     <div className="app-shell">
       <header className="app-header">
         <div className="app-brand">Groceries</div>
-        <nav className="app-nav" aria-label="Account">
+        <nav className="app-nav" aria-label="Main">
           <span className="greeting">Hi, {user.name}</span>
           <NavLink to="/grocery-lists" end>
             My lists

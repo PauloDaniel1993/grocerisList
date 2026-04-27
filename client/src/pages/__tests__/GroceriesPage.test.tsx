@@ -1,6 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TestRouter } from "../../test/TestRouter";
 import App from "../../App";
 import { GroceryList } from "../../components/GroceryList";
@@ -264,7 +264,7 @@ describe("GroceriesPage", () => {
 
 describe("GroceryList", () => {
   it("shows empty state when there are no items", () => {
-    render(<GroceryList items={[]} />);
+    render(<GroceryList items={[]} onToggleBought={vi.fn()} />);
     expect(screen.getByText("Your list is empty.")).toBeInTheDocument();
   });
 });

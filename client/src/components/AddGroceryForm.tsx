@@ -7,7 +7,6 @@ import {
   type NewGroceryItemInput,
 } from "../types/grocery";
 
-const nameErrorId = "grocery-name-error";
 
 const defaultCategory: GroceryCategory = "other";
 
@@ -20,6 +19,7 @@ export function AddGroceryForm({ onAdd }: AddGroceryFormProps) {
   const [category, setCategory] = useState<GroceryCategory>(defaultCategory);
   const [nameError, setNameError] = useState<string | null>(null);
   const nameId = useId();
+  const nameErrorId = `${nameId}-error`;
   const categoryId = useId();
   const nameInputRef = useRef<HTMLInputElement | null>(null);
 
