@@ -104,7 +104,8 @@ label {
 
 input[type="text"],
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+select {
   padding: 0.5rem 0.6rem;
   border: 1px solid #a8a29e;
   border-radius: 0.25rem;
@@ -203,4 +204,113 @@ th {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+.grocery-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+}
+
+.grocery-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid #e7e5e4;
+}
+
+.grocery-row:last-child {
+  border-bottom: 0;
+}
+
+.grocery-name {
+  font-weight: 600;
+}
+
+.grocery-category {
+  font-size: 0.9rem;
+  color: #57534e;
+}
+
+.empty-groceries {
+  margin: 0.75rem 0 0;
+  color: #57534e;
+}
+
+.grocery-filter {
+  margin: 0 0 0.75rem;
+  padding: 0;
+  border: 0;
+}
+
+.grocery-filter__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.grocery-filter__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid #a8a29e;
+  border-radius: 0.25rem;
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.grocery-filter__option input {
+  margin: 0;
+}
+
+.grocery-filter__option--active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #fff;
+}
+
+.add-grocery-form {
+  margin-bottom: 1rem;
+}
+
+.add-grocery-form__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1.25rem;
+}
+
+.add-grocery-form .field-inline {
+  flex: 1 1 10rem;
+  min-width: 8rem;
+  margin-bottom: 0;
+}
+
+.add-grocery-form__submit button[type="submit"] {
+  margin-top: 0;
+}
+
+.grocery-row__checkbox {
+  flex-shrink: 0;
+  margin: 0 0.5rem 0 0;
+  cursor: pointer;
+}
+
+.grocery-row--bought .grocery-name {
+  text-decoration: line-through;
+  color: #78716c;
+}
+
+.grocery-row--bought .grocery-category {
+  color: #a8a29e;
 }

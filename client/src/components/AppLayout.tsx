@@ -16,6 +16,9 @@ export function AppLayout() {
         <div className="app-brand">Groceries</div>
         <nav className="app-nav" aria-label="Account">
           <span className="greeting">Hi, {user.name}</span>
+          <NavLink to="/groceries" end>
+            Groceries
+          </NavLink>
           <NavLink to="/account/profile" end>
             Profile
           </NavLink>
