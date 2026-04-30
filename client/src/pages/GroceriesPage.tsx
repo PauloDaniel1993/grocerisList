@@ -91,13 +91,23 @@ export function GroceriesPage() {
     );
   }
 
-  async function handleToggleBought(id: string) {
+  function handleToggleBought(id: string) {
     const item = items.find((i) => i.id === id);
     if (!item) return;
-    const updated = await updateGroceryItemInList(listId, id, {
-      bought: !item.bought,
-    });
-    setItems((prev) => prev.map((it) => (it.id === id ? updated : it)));
+
+    setItemError(null);
+    void (async () => {
+      try {
+        const updated = await updateGroceryItemInList(listId, id, {
+          bought: !item.bought,
+        });
+        setItems((prev) => prev.map((it) => (it.id === id ? updated : it)));
+      } catch (e) {
+        setItemError(
+          e instanceof Error ? e.message : "Could not update this item"
+        );
+      }
+    })();
   }
 
   return (
@@ -116,7 +126,6 @@ export function GroceriesPage() {
             setItemError(
               e instanceof Error ? e.message : "Could not add this item"
             );
-            throw e;
           }
         }}
       />

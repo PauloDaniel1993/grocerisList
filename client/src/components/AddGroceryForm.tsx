@@ -31,7 +31,11 @@ export function AddGroceryForm({ onAdd }: AddGroceryFormProps) {
       setNameError("Name is required");
       return;
     }
-    await onAdd({ name: trimmed, category });
+    try {
+      await onAdd({ name: trimmed, category });
+    } catch {
+      return;
+    }
     setName("");
     setCategory(defaultCategory);
     nameInputRef.current?.focus();

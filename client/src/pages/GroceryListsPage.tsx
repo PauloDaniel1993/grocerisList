@@ -91,6 +91,7 @@ export function GroceryListsPage() {
             <button
               type="button"
               className="grocery-lists__delete"
+              aria-label={`Delete ${list.name}`}
               onClick={async () => {
                 if (!window.confirm("Delete this list and all of its items?")) {
                   return;
