@@ -11,10 +11,7 @@ type GroceryItemRowProps = {
 export function GroceryItemRow({ item, onToggleBought }: GroceryItemRowProps) {
   return (
     <li
-      className={cn(
-        "grocery-row flex min-h-11 items-center gap-3 rounded-md border bg-card p-3 shadow-sm transition-colors hover:bg-accent/40",
-        item.bought && "grocery-row--bought"
-      )}
+      className="flex min-h-11 items-center gap-3 rounded-md border bg-card p-3 shadow-sm transition-colors hover:bg-accent/40"
     >
       <Checkbox
         className="h-5 w-5"
@@ -25,7 +22,7 @@ export function GroceryItemRow({ item, onToggleBought }: GroceryItemRowProps) {
       <span
         className={cn(
           "flex-1 text-sm",
-          item.bought && "text-muted-foreground line-through opacity-60"
+          item.bought && "text-muted-foreground line-through opacity-50"
         )}
       >
         {item.name}

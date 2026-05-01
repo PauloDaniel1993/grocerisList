@@ -21,6 +21,12 @@ A user can manage grocery lists, add grocery items, mark items as bought, and fi
 - **Dev**: from the repository root, copy `server/.env.example` to `server/.env` (or use the same variables), then run `npm run dev`. Sign in with seeded users (default password `password123!` unless overridden): `user@example.com` (user), `admin@example.com` (admin). Seed: `npm run prisma:seed -w server` after a fresh DB.
 - **Tests** (from root): `npm test`. Server tests use `server/prisma/vitest.db`.
 
+The client is built with Tailwind CSS v3 and shadcn/ui (new-york style, neutral
+base) for accessible primitives, sonner for toast notifications, react-hook-form
++ zod for typed form validation, lucide-react for icons, and next-themes for
+light/dark/system theme switching (persisted in localStorage and reflected on
+`<html class="dark">`).
+
 ## How to use with Cursor
 
 1. Open this folder in Cursor.

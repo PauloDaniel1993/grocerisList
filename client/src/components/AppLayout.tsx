@@ -20,6 +20,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
+import {
+  ThemeToggleInline,
+  ThemeToggleMenuItem,
+} from "@/components/ThemeToggle";
 
 type NavItem = { to: string; label: string; end?: boolean };
 
@@ -130,6 +134,8 @@ export function AppLayout() {
                   </DropdownMenuItem>
                 ) : null}
                 <DropdownMenuSeparator />
+                <ThemeToggleMenuItem />
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => void handleLogout()}>
                   <LogOut />
                   <span>Log out</span>
@@ -182,6 +188,10 @@ export function AppLayout() {
                   </NavLink>
                 ))}
               </nav>
+              <Separator />
+              <div className="px-3 py-4">
+                <ThemeToggleInline />
+              </div>
               <Separator />
               <div className="px-3 py-4">
                 <Button

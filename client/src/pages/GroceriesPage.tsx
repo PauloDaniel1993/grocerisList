@@ -32,11 +32,7 @@ type LoadState =
   | { status: "ok" };
 
 function PageShell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
-      {children}
-    </div>
-  );
+  return <div className="mx-auto w-full max-w-3xl">{children}</div>;
 }
 
 function BackLink() {
