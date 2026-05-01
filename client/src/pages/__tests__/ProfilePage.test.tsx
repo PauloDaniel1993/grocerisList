@@ -1,12 +1,29 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TestRouter } from "../../test/TestRouter";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import App from "../../App";
+import { Toaster } from "@/components/ui/sonner";
 import { useAuthStore } from "../../stores/authStore";
 import { setProfileSaveHandler } from "../../test/mswServer";
 
 describe("ProfilePage", () => {
+  beforeAll(() => {
+    if (!window.matchMedia) {
+      window.matchMedia = (query: string) =>
+        ({
+          matches: false,
+          media: query,
+          onchange: null,
+          addListener: () => {},
+          removeListener: () => {},
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          dispatchEvent: () => false,
+        }) as unknown as MediaQueryList;
+    }
+  });
+
   beforeEach(() => {
     setProfileSaveHandler();
     useAuthStore.setState({ user: null, status: "loading" });
@@ -17,6 +34,7 @@ describe("ProfilePage", () => {
     render(
       <TestRouter initialEntries={["/account/profile"]}>
         <App />
+        <Toaster />
       </TestRouter>
     );
     await waitFor(() => {
