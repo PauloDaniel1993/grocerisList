@@ -53,10 +53,8 @@ describe("GroceriesPage", () => {
       ).toBeInTheDocument();
     });
     await user.type(screen.getByLabelText(/^name$/i), "Lemons");
-    await user.selectOptions(
-      screen.getByLabelText(/^category$/i),
-      "produce"
-    );
+    await user.click(screen.getByLabelText(/^category$/i));
+    await user.click(await screen.findByRole("option", { name: /^produce$/i }));
     await user.click(screen.getByRole("button", { name: /^add$/i }));
     expect(screen.getByText("Lemons")).toBeInTheDocument();
   });
@@ -153,7 +151,7 @@ describe("GroceriesPage", () => {
     await user.click(
       screen.getByRole("checkbox", { name: /mark milk as bought/i })
     );
-    await user.click(screen.getByRole("radio", { name: /^active$/i }));
+    await user.click(screen.getByRole("tab", { name: /^active$/i }));
 
     const list = screen.getByRole("list", { name: /grocery items/i });
     expect(within(list).queryByText("Milk")).not.toBeInTheDocument();
@@ -187,7 +185,7 @@ describe("GroceriesPage", () => {
     await user.click(
       screen.getByRole("checkbox", { name: /mark paper towels as bought/i })
     );
-    await user.click(screen.getByRole("radio", { name: /^active$/i }));
+    await user.click(screen.getByRole("tab", { name: /^active$/i }));
     expect(screen.getByText("No active items.")).toBeInTheDocument();
   });
 
@@ -206,7 +204,7 @@ describe("GroceriesPage", () => {
       ).toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole("radio", { name: /^bought$/i }));
+    await user.click(screen.getByRole("tab", { name: /^bought$/i }));
     expect(screen.getByText("No bought items.")).toBeInTheDocument();
     expect(
       screen.queryByRole("list", { name: /grocery items/i })
@@ -228,10 +226,10 @@ describe("GroceriesPage", () => {
       ).toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole("radio", { name: /^bought$/i }));
+    await user.click(screen.getByRole("tab", { name: /^bought$/i }));
     expect(screen.getByText("No bought items.")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("radio", { name: /^all$/i }));
+    await user.click(screen.getByRole("tab", { name: /^all$/i }));
     const list = screen.getByRole("list", { name: /grocery items/i });
     expect(within(list).getByText("Milk")).toBeInTheDocument();
   });
@@ -251,7 +249,7 @@ describe("GroceriesPage", () => {
       ).toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole("radio", { name: /^active$/i }));
+    await user.click(screen.getByRole("tab", { name: /^active$/i }));
     const list = screen.getByRole("list", { name: /grocery items/i });
     expect(within(list).getByText("Spinach")).toBeInTheDocument();
 

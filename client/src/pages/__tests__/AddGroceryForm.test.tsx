@@ -32,10 +32,8 @@ describe("AddGroceryForm", () => {
     render(<AddGroceryForm onAdd={onAdd} />);
     const name = screen.getByLabelText(/^name$/i);
     await user.type(name, "  Blueberries  ");
-    await user.selectOptions(
-      screen.getByLabelText(/^category$/i),
-      "dairy"
-    );
+    await user.click(screen.getByLabelText(/^category$/i));
+    await user.click(await screen.findByRole("option", { name: /^dairy$/i }));
     await user.click(screen.getByRole("button", { name: /^add$/i }));
     expect(onAdd).toHaveBeenCalledTimes(1);
     expect(onAdd).toHaveBeenCalledWith({
@@ -43,6 +41,6 @@ describe("AddGroceryForm", () => {
       category: "dairy",
     });
     expect(name).toHaveValue("");
-    expect(screen.getByLabelText(/^category$/i)).toHaveValue("other");
+    expect(screen.getByLabelText(/^category$/i)).toHaveTextContent(/other/i);
   });
 });

@@ -1,3 +1,4 @@
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   GROCERY_FILTERS,
   getGroceryFilterLabel,
@@ -11,27 +12,18 @@ type GroceryFilterProps = {
 
 export function GroceryFilter({ value, onChange }: GroceryFilterProps) {
   return (
-    <fieldset className="grocery-filter" aria-label="Filter items">
-      <legend className="visually-hidden">Filter items</legend>
-      <div className="grocery-filter__options">
+    <Tabs
+      value={value}
+      onValueChange={(next) => onChange(next as GroceryFilter)}
+      aria-label="Filter items"
+    >
+      <TabsList className="grid h-11 w-full grid-cols-3 sm:inline-flex sm:w-auto">
         {GROCERY_FILTERS.map((f) => (
-          <label
-            key={f}
-            className={`grocery-filter__option${
-              value === f ? " grocery-filter__option--active" : ""
-            }`}
-          >
-            <input
-              type="radio"
-              name="grocery-filter"
-              value={f}
-              checked={value === f}
-              onChange={() => onChange(f)}
-            />
+          <TabsTrigger key={f} value={f} className="h-9">
             {getGroceryFilterLabel(f)}
-          </label>
+          </TabsTrigger>
         ))}
-      </div>
-    </fieldset>
+      </TabsList>
+    </Tabs>
   );
 }

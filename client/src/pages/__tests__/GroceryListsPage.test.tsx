@@ -1,7 +1,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { TestRouter } from "../../test/TestRouter";
 import App from "../../App";
 import { server, setSessionToUser } from "../../test/mswServer";
@@ -87,7 +87,7 @@ describe("GroceryListsPage", () => {
     ).toHaveAttribute("href", "/grocery-lists/new-0");
   });
 
-  it("deletes a list when confirmed", async () => {
+  it("deletes a list when confirmed via the alert dialog", async () => {
     const user = userEvent.setup();
     apiLists = [
       {
@@ -99,9 +99,6 @@ describe("GroceryListsPage", () => {
     ];
     setSessionToUser();
     useAuthStore.setState({ user: null, status: "loading" });
-    const confirmSpy = vi
-      .spyOn(window, "confirm")
-      .mockImplementation(() => true);
     render(
       <TestRouter initialEntries={["/grocery-lists"]}>
         <App />
@@ -110,11 +107,16 @@ describe("GroceryListsPage", () => {
     await waitFor(() => {
       expect(screen.getByText("Keep")).toBeInTheDocument();
     });
-    await user.click(screen.getByRole("button", { name: /^delete$/i }));
-    expect(confirmSpy).toHaveBeenCalled();
+    await user.click(
+      screen.getByRole("button", { name: /actions for keep/i })
+    );
+    await user.click(
+      await screen.findByRole("menuitem", { name: /delete/i })
+    );
+    const dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: /^delete$/i }));
     await waitFor(() => {
       expect(screen.queryByText("Keep")).not.toBeInTheDocument();
     });
-    confirmSpy.mockRestore();
   });
 });
