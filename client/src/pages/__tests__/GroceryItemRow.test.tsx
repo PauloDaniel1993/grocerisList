@@ -6,6 +6,7 @@ import type { GroceryItem } from "../../types/grocery";
 
 const baseItem: GroceryItem = {
   id: "test-1",
+  listId: "l1",
   name: "Eggs",
   category: "dairy",
   bought: false,
@@ -40,7 +41,7 @@ describe("GroceryItemRow", () => {
     expect(onToggleBought).toHaveBeenCalledWith("test-1");
   });
 
-  it("renders a checked checkbox and bought class when item.bought is true", () => {
+  it("renders a checked checkbox and line-through name when item.bought is true", () => {
     render(
       <GroceryItemRow
         item={{ ...baseItem, bought: true }}
@@ -51,11 +52,11 @@ describe("GroceryItemRow", () => {
       name: /mark eggs as not bought/i,
     });
     expect(checkbox).toBeChecked();
-    expect(screen.getByRole("listitem")).toHaveClass("grocery-row--bought");
+    expect(screen.getByText("Eggs")).toHaveClass("line-through");
   });
 
-  it("does not apply bought class when item.bought is false", () => {
+  it("does not apply line-through to the name when item.bought is false", () => {
     render(<GroceryItemRow item={baseItem} onToggleBought={vi.fn()} />);
-    expect(screen.getByRole("listitem")).not.toHaveClass("grocery-row--bought");
+    expect(screen.getByText("Eggs")).not.toHaveClass("line-through");
   });
 });

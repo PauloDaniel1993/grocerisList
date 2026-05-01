@@ -39,7 +39,7 @@ describe("LoginPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("navigates to profile after successful login", async () => {
+  it("navigates to my lists after successful login", async () => {
     const user = userEvent.setup();
     renderAt("/login");
     await screen.findByRole("heading", { name: /sign in/i });
@@ -47,7 +47,7 @@ describe("LoginPage", () => {
     await user.type(screen.getByLabelText(/password/i), "password123!");
     await user.click(screen.getByRole("button", { name: /sign in/i }));
     await waitFor(() => {
-      expect(screen.getByRole("heading", { name: /^profile$/i })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: /^my lists$/i })).toBeInTheDocument();
     });
   });
 });

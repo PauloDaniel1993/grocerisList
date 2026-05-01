@@ -21,7 +21,7 @@ export function GroceryList({
     return <EmptyGroceries message={getEmptyGroceryListMessage(filter)} />;
   }
   return (
-    <ul className="grocery-list" aria-label="Grocery items">
+    <ul role="list" aria-label="Grocery items" className="flex flex-col gap-2">
       {items.map((item) => (
         <GroceryItemRow key={item.id} item={item} onToggleBought={onToggleBought} />
       ))}

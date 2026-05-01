@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { TestRouter } from "../../test/TestRouter";
 import { beforeEach, describe, expect, it } from "vitest";
 import App from "../../App";
@@ -18,12 +18,12 @@ describe("AdminUsersPage", () => {
         <App />
       </TestRouter>
     );
-    await waitFor(() => {
-      expect(screen.getByRole("table")).toBeInTheDocument();
-    });
+    const table = await waitFor(() => screen.getByRole("table"));
     expect(
-      await screen.findByText(baseUser.name, { exact: true })
+      await within(table).findByText(baseUser.name, { exact: true })
     ).toBeInTheDocument();
-    expect(screen.getByText(baseUser.email, { exact: true })).toBeInTheDocument();
+    expect(
+      within(table).getByText(baseUser.email, { exact: true })
+    ).toBeInTheDocument();
   });
 });

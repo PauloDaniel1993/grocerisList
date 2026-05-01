@@ -1,35 +1,85 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import * as api from "../api/client";
-import { ErrorText } from "../components/ErrorText";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { ChevronLeft, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import * as api from "@/api/client";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const errId = "admin-edit-error";
+const editSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  role: z.enum(["user", "admin"]),
+});
+
+type EditForm = z.infer<typeof editSchema>;
+
+function LoadingShell() {
+  return (
+    <div className="space-y-6">
+      <Skeleton className="h-9 w-24" />
+      <Card className="max-w-xl">
+        <CardHeader>
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-4 w-48" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-11 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 export function AdminUserEditPage() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [role, setRole] = useState<"user" | "admin">("user");
-  const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const [originalName, setOriginalName] = useState("");
+
+  const form = useForm<EditForm>({
+    resolver: zodResolver(editSchema),
+    defaultValues: { name: "", role: "user" },
+  });
 
   useEffect(() => {
     if (!userId) {
       return;
     }
     let cancelled = false;
+    setLoading(true);
     void (async () => {
-      setLoading(true);
       try {
         const u = await api.getAdminUser(userId);
         if (!cancelled) {
-          setName(u.name);
-          setRole(u.role);
+          form.reset({ name: u.name, role: u.role });
+          setOriginalName(u.name);
         }
       } catch (e) {
         if (!cancelled) {
-          setFormError(
+          toast.error(
             e instanceof Error ? e.message : "Could not load this user"
           );
         }
@@ -42,85 +92,126 @@ export function AdminUserEditPage() {
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, form]);
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
+  if (loading) {
+    return <LoadingShell />;
+  }
+
+  const submitting = form.formState.isSubmitting;
+
+  async function onSubmit(values: EditForm) {
     if (!userId) {
       return;
     }
-    setFormError(null);
-    const trimmed = name.trim();
-    if (!trimmed) {
-      setFormError("Name is required");
-      return;
-    }
-    setSubmitting(true);
     try {
-      await api.patchAdminUser(userId, { name: trimmed, role });
+      await api.patchAdminUser(userId, {
+        name: values.name.trim(),
+        role: values.role,
+      });
+      toast.success("User updated");
       navigate("/admin/users");
     } catch (e) {
-      setFormError(e instanceof Error ? e.message : "Could not save");
-    } finally {
-      setSubmitting(false);
+      toast.error(e instanceof Error ? e.message : "Could not save");
     }
-  }
-
-  if (loading) {
-    return <p>Loading</p>;
   }
 
   return (
-    <div className="page page-narrow">
-      <h1>Edit user</h1>
-      <form onSubmit={onSubmit}>
-        <div className="field">
-          <label htmlFor="name">Name</label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-        <fieldset>
-          <legend>Role</legend>
-          <label>
-            <input
-              type="radio"
-              name="role"
-              value="user"
-              checked={role === "user"}
-              onChange={() => setRole("user")}
-            />
-            User
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="role"
-              value="admin"
-              checked={role === "admin"}
-              onChange={() => setRole("admin")}
-            />
-            Admin
-          </label>
-        </fieldset>
-        <ErrorText id={errId} message={formError} />
-        <div className="row">
-          <button type="submit" disabled={submitting}>
-            {submitting ? "Saving" : "Save"}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/admin/users")}
-            className="secondary"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+    <div className="space-y-6">
+      <Button asChild variant="ghost" size="sm">
+        <Link to="/admin/users">
+          <ChevronLeft className="mr-1 h-4 w-4" />
+          Users
+        </Link>
+      </Button>
+
+      <Card className="max-w-xl">
+        <CardHeader>
+          <CardTitle>Edit user</CardTitle>
+          <CardDescription>
+            {originalName ? `Editing ${originalName}` : "Update user details"}
+          </CardDescription>
+        </CardHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardContent className="space-y-6">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        autoComplete="name"
+                        className="h-11"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Role</FormLabel>
+                    <FormDescription>
+                      Admins can manage users and all grocery lists.
+                    </FormDescription>
+                    <FormControl>
+                      <RadioGroup
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        className="gap-3"
+                      >
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <RadioGroupItem value="user" id="role-user" />
+                          <span>User</span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <RadioGroupItem value="admin" id="role-admin" />
+                          <span>Admin</span>
+                        </label>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+            <CardFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={() => navigate("/admin/users")}
+                className="h-11 w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="lg"
+                disabled={submitting}
+                className="h-11 w-full sm:w-auto"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving
+                  </>
+                ) : (
+                  "Save"
+                )}
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
+      </Card>
     </div>
   );
 }
