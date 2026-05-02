@@ -7,6 +7,7 @@ import { AdminUserEditPage } from "./pages/AdminUserEditPage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
 import { BoughtListDetailPage } from "./pages/BoughtListDetailPage";
 import { BoughtListsPage } from "./pages/BoughtListsPage";
+import { DashboardPage } from "./pages/DashboardPage";
 import { LoginPage } from "./pages/LoginPage";
 import { GroceryListsPage } from "./pages/GroceryListsPage";
 import { GroceriesPage } from "./pages/GroceriesPage";
@@ -29,6 +30,7 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/grocery-lists" element={<GroceryListsPage />} />
           <Route path="/grocery-lists/:listId" element={<GroceriesPage />} />
           <Route path="/bought-lists" element={<BoughtListsPage />} />

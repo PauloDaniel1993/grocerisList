@@ -25,6 +25,12 @@ export const server = setupServer(
   http.get("/api/grocery-lists", () => {
     return HttpResponse.json({ lists: [] });
   }),
+  http.get("/api/price-history/products", () => {
+    return HttpResponse.json({ products: [] });
+  }),
+  http.get("/api/price-history", () => {
+    return HttpResponse.json({ points: [] });
+  }),
   http.get("/api/users/me", () => {
     return HttpResponse.json({ error: "Unauthorized" }, { status: 401 });
   }),

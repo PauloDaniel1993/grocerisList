@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { ProductAutocomplete } from "./ProductAutocomplete";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,7 +15,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -75,14 +75,20 @@ export function AddGroceryForm({ onAdd }: AddGroceryFormProps) {
             <FormItem className="space-y-1">
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
+                <ProductAutocomplete
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
                   ref={(el) => {
                     field.ref(el);
                     nameInputRef.current = el;
                   }}
-                  autoComplete="off"
-                  className="h-11"
+                  onSelectProduct={(p) => {
+                    form.setValue("category", p.category, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
+                  }}
                 />
               </FormControl>
               <FormMessage />

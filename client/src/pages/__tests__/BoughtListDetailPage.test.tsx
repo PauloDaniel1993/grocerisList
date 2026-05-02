@@ -6,7 +6,7 @@ import App from "../../App";
 import { useAuthStore } from "../../stores/authStore";
 import { server, setSessionToUser } from "../../test/mswServer";
 import { TestRouter } from "../../test/TestRouter";
-import type { BoughtItem, BoughtList } from "../../types/boughtList";
+import type { BoughtList } from "../../types/boughtList";
 import type { GroceryCategory } from "../../types/grocery";
 
 function createFile(content: string, name: string, type: string): File {
@@ -76,6 +76,10 @@ describe("BoughtListDetailPage", () => {
         screen.getByRole("heading", { name: /weekly - 2024-01-10/i })
       ).toBeInTheDocument();
     });
+    expect(
+      screen.getByRole("button", { name: /download template/i })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^export$/i })).toBeInTheDocument();
     expect(screen.getByText("Milk")).toBeInTheDocument();
     expect(screen.getByText("Dairy")).toBeInTheDocument();
     expect(screen.getByText("Corner Market")).toBeInTheDocument();

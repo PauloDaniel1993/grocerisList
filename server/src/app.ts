@@ -5,6 +5,7 @@ import { usersRouter } from "./routes/users.js";
 import { adminUsersRouter } from "./routes/adminUsers.js";
 import { boughtListsRouter } from "./routes/boughtLists.js";
 import { groceryListsRouter } from "./routes/groceryLists.js";
+import { priceHistoryRouter } from "./routes/priceHistory.js";
 
 export function createApp() {
   const app = express();
@@ -21,6 +22,7 @@ export function createApp() {
   app.use("/api/admin/users", adminUsersRouter);
   app.use("/api/grocery-lists", groceryListsRouter);
   app.use("/api/bought-lists", boughtListsRouter);
+  app.use("/api/price-history", priceHistoryRouter);
 
   return app;
 }

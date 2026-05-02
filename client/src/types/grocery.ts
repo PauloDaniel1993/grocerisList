@@ -37,6 +37,13 @@ export function getGroceryCategoryLabel(category: GroceryCategory): string {
   return GROCERY_CATEGORY_LABELS[category];
 }
 
+/** Coerces unknown strings from the API to a valid category. */
+export function parseGroceryCategory(value: string): GroceryCategory {
+  return GROCERY_CATEGORIES.includes(value as GroceryCategory)
+    ? (value as GroceryCategory)
+    : "other";
+}
+
 export type NewGroceryItemInput = {
   name: string;
   category: GroceryCategory;

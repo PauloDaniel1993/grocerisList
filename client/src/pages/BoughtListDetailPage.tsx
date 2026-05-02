@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import {
   AlertCircle,
   ChevronLeft,
+  Download,
+  FileDown,
   FileQuestion,
   ReceiptText,
   Upload,
@@ -36,6 +38,12 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getBoughtList, updateBoughtItem, updateBoughtItemPrice } from "../api/client";
+import {
+  BOUGHT_LIST_IMPORT_TEMPLATE_CSV,
+  boughtItemsToCsv,
+  sanitizeFilenameBase,
+  triggerTextFileDownload,
+} from "../lib/boughtListCsv";
 import {
   matchEntries,
   parseImportFile,
@@ -482,22 +490,57 @@ export function BoughtListDetailPage() {
         <Badge variant="secondary" aria-label="Bought item count">
           {items.length}
         </Badge>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv,.json"
-          className="hidden"
-          onChange={handleFileSelected}
-        />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={items.length === 0}
-        >
-          <Upload className="h-4 w-4" />
-          Import
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              triggerTextFileDownload(
+                "bought-list-import-template.csv",
+                BOUGHT_LIST_IMPORT_TEMPLATE_CSV
+              );
+            }}
+          >
+            <FileDown className="h-4 w-4" />
+            Download template
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={items.length === 0}
+            onClick={() => {
+              const base = sanitizeFilenameBase(
+                boughtList?.name ?? "bought-list"
+              );
+              triggerTextFileDownload(
+                `${base}.csv`,
+                boughtItemsToCsv(items)
+              );
+            }}
+          >
+            <Download className="h-4 w-4" />
+            Export
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.json"
+            className="hidden"
+            onChange={handleFileSelected}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={items.length === 0}
+          >
+            <Upload className="h-4 w-4" />
+            Import
+          </Button>
+        </div>
       </div>
       {boughtList ? (
         <div className="mt-1 space-y-1 text-sm text-muted-foreground">

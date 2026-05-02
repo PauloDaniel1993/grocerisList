@@ -213,3 +213,35 @@ All bought-list endpoints require an authenticated session. Bought lists belong 
 ### Legacy (not implemented)
 
 The earlier flat `/api/groceries` contract was superseded by list-scoped routes above.
+
+## Price history (dashboard & product autocomplete)
+
+All endpoints below require an authenticated session. Data is derived from the current user’s `BoughtItem` rows (with `BoughtList` for trip date and location). Unauthenticated requests return `401 { "error": string }`.
+
+### Types
+
+```ts
+type PriceHistoryProduct = {
+  name: string;
+  category: GroceryItem["category"];
+};
+
+type PricePoint = {
+  name: string;
+  price: number;
+  date: string; // BoughtList.createdAt (ISO)
+  location: string | null;
+};
+```
+
+### `GET /api/price-history/products`
+
+- Success `200`: `{ "products": PriceHistoryProduct[] }` — distinct product names (case-insensitive), alphabetically by `name`; `category` is taken from the most recent matching bought item.
+
+### `GET /api/price-history`
+
+- Query: `product` (optional, string), `category` (optional, `GroceryItem["category"]`), `from` (optional, ISO date), `to` (optional, ISO date).
+- At least one of `product` or `category` is required; otherwise `400 { "error": string }`.
+- Only items with a non-null `price` are included. `product` is matched case-insensitively on `BoughtItem.name`.
+- Success `200`: `{ "points": PricePoint[] }` — sorted by `date` ascending.
+- Error `400`: invalid category, invalid `from` / `to`, or missing filters.

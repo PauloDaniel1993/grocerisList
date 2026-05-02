@@ -1,6 +1,8 @@
 import type { GroceryList } from "../types/groceryList";
 import type { GroceryItem, GroceryCategory } from "../types/grocery";
 import type { BoughtItem, BoughtList } from "../types/boughtList";
+import type { PriceHistoryProduct, PricePoint } from "../types/priceHistory";
+import { parseGroceryCategory } from "../types/grocery";
 import type { User } from "../types/user";
 
 const jsonHeaders = { "Content-Type": "application/json" } as const;
@@ -323,4 +325,44 @@ export async function deleteBoughtList(id: string): Promise<void> {
   if (res.status === 204) return;
   const body = (await readBody(res)) as { error?: string };
   throw new Error(body?.error ?? "Request failed");
+}
+
+export async function getPriceHistoryProducts(): Promise<PriceHistoryProduct[]> {
+  const res = await fetch("/api/price-history/products", {
+    credentials: "include",
+  });
+  const body = (await readBody(res)) as {
+    products?: { name: string; category: string }[];
+    error?: string;
+  };
+  if (!res.ok) {
+    throw new Error(body?.error ?? "Request failed");
+  }
+  if (!body.products) throw new Error("Invalid response");
+  return body.products.map((p) => ({
+    name: p.name,
+    category: parseGroceryCategory(p.category),
+  }));
+}
+
+export async function getPriceHistory(params: {
+  product?: string;
+  category?: string;
+  from?: string;
+  to?: string;
+}): Promise<PricePoint[]> {
+  const q = new URLSearchParams();
+  if (params.product?.trim()) q.set("product", params.product.trim());
+  if (params.category?.trim()) q.set("category", params.category.trim());
+  if (params.from?.trim()) q.set("from", params.from.trim());
+  if (params.to?.trim()) q.set("to", params.to.trim());
+  const res = await fetch(`/api/price-history?${q.toString()}`, {
+    credentials: "include",
+  });
+  const body = (await readBody(res)) as { points?: PricePoint[]; error?: string };
+  if (!res.ok) {
+    throw new Error(body?.error ?? "Request failed");
+  }
+  if (!body.points) throw new Error("Invalid response");
+  return body.points;
 }

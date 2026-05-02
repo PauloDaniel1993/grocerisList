@@ -103,9 +103,15 @@ function handlersForList(listId: string) {
         if (idx === -1) {
           return HttpResponse.json({ error: "Item not found" }, { status: 404 });
         }
+        const prev = mockItems[idx]!;
         const next: GroceryItem = {
-          ...mockItems[idx],
-          ...(body.bought !== undefined ? { bought: body.bought } : {}),
+          id: prev.id,
+          listId: prev.listId,
+          name: prev.name,
+          category: prev.category,
+          bought:
+            body.bought !== undefined ? body.bought : prev.bought,
+          createdAt: prev.createdAt,
         };
         mockItems = mockItems.map((i) => (i.id === itemId ? next : i));
         return HttpResponse.json({ item: next });
