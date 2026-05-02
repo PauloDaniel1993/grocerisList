@@ -130,4 +130,111 @@ describe("Grocery lists API", () => {
     const items = await agent.get(`/api/grocery-lists/${listId}/items`);
     expect(items.status).toBe(404);
   });
+
+  it("ends grocery by moving bought items into a bought list", async () => {
+    const agent = request.agent(app);
+    await loginAsUser(agent);
+    const { body: c } = await agent.post("/api/grocery-lists").send({ name: "Trip" });
+    const listId = c.list.id as string;
+    const milk = await agent.post(`/api/grocery-lists/${listId}/items`).send({
+      name: "Milk",
+      category: "dairy",
+    });
+    await agent.post(`/api/grocery-lists/${listId}/items`).send({
+      name: "Spinach",
+      category: "produce",
+    });
+    await agent
+      .patch(`/api/grocery-lists/${listId}/items/${milk.body.item.id}`)
+      .send({ bought: true });
+
+    const ended = await agent
+      .post(`/api/grocery-lists/${listId}/end-grocery`)
+      .send({ location: "  Corner Market  " });
+    expect(ended.status).toBe(201);
+    expect(ended.body.boughtList).toMatchObject({
+      groceryListId: listId,
+      location: "Corner Market",
+      name: expect.stringMatching(/^Trip - \d{4}-\d{2}-\d{2}$/),
+    });
+    expect(ended.body.boughtList.items).toEqual([
+      expect.objectContaining({
+        name: "Milk",
+        category: "dairy",
+        price: null,
+      }),
+    ]);
+
+    const remaining = await agent.get(`/api/grocery-lists/${listId}/items`);
+    expect(remaining.body.items).toEqual([
+      expect.objectContaining({ name: "Spinach", bought: false }),
+    ]);
+  });
+
+  it("rejects ending grocery when no items are bought", async () => {
+    const agent = request.agent(app);
+    await loginAsUser(agent);
+    const { body: c } = await agent.post("/api/grocery-lists").send({ name: "Trip" });
+    const listId = c.list.id as string;
+    await agent.post(`/api/grocery-lists/${listId}/items`).send({
+      name: "Milk",
+      category: "dairy",
+    });
+
+    const ended = await agent.post(`/api/grocery-lists/${listId}/end-grocery`);
+    expect(ended.status).toBe(400);
+  });
+
+  it("lists bought lists and updates bought item prices for the owner", async () => {
+    const agent = request.agent(app);
+    await loginAsUser(agent);
+    const { body: c } = await agent.post("/api/grocery-lists").send({ name: "Trip" });
+    const listId = c.list.id as string;
+    const milk = await agent.post(`/api/grocery-lists/${listId}/items`).send({
+      name: "Milk",
+      category: "dairy",
+    });
+    await agent
+      .patch(`/api/grocery-lists/${listId}/items/${milk.body.item.id}`)
+      .send({ bought: true });
+    const ended = await agent.post(`/api/grocery-lists/${listId}/end-grocery`);
+    const boughtListId = ended.body.boughtList.id as string;
+    const boughtItemId = ended.body.boughtList.items[0].id as string;
+
+    const lists = await agent.get("/api/bought-lists");
+    expect(lists.status).toBe(200);
+    expect(lists.body.boughtLists).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: boughtListId, groceryListId: listId }),
+      ])
+    );
+
+    const listPatch = await agent
+      .patch(`/api/bought-lists/${boughtListId}`)
+      .send({ location: "Downtown Shop" });
+    expect(listPatch.status).toBe(200);
+    expect(listPatch.body.boughtList.location).toBe("Downtown Shop");
+
+    const patch = await agent
+      .patch(`/api/bought-lists/${boughtListId}/items/${boughtItemId}`)
+      .send({ price: 2.49 });
+    expect(patch.status).toBe(200);
+    expect(patch.body.item.price).toBe(2.49);
+
+    const categoryPatch = await agent
+      .patch(`/api/bought-lists/${boughtListId}/items/${boughtItemId}`)
+      .send({ category: "produce" });
+    expect(categoryPatch.status).toBe(200);
+    expect(categoryPatch.body.item.category).toBe("produce");
+
+    const detail = await agent.get(`/api/bought-lists/${boughtListId}`);
+    expect(detail.body.boughtList.location).toBe("Downtown Shop");
+    expect(detail.body.boughtList.items).toEqual([
+      expect.objectContaining({
+        id: boughtItemId,
+        price: 2.49,
+        category: "produce",
+      }),
+    ]);
+  });
 });

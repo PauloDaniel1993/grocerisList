@@ -3,6 +3,7 @@ import { sessionMiddleware } from "./session.js";
 import { authRouter } from "./routes/auth.js";
 import { usersRouter } from "./routes/users.js";
 import { adminUsersRouter } from "./routes/adminUsers.js";
+import { boughtListsRouter } from "./routes/boughtLists.js";
 import { groceryListsRouter } from "./routes/groceryLists.js";
 
 export function createApp() {
@@ -19,6 +20,7 @@ export function createApp() {
   app.use("/api/users", usersRouter);
   app.use("/api/admin/users", adminUsersRouter);
   app.use("/api/grocery-lists", groceryListsRouter);
+  app.use("/api/bought-lists", boughtListsRouter);
 
   return app;
 }

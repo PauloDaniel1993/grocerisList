@@ -16,16 +16,18 @@ model User {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   groceryLists   GroceryList[]
+  boughtLists    BoughtList[]
 }
 
 model GroceryList {
-  id        String        @id @default(cuid())
-  name      String
-  userId    String
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items     GroceryItem[]
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id          String        @id @default(cuid())
+  name        String
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       GroceryItem[]
+  boughtLists BoughtList[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@index([userId])
 }
@@ -40,4 +42,31 @@ model GroceryItem {
   createdAt DateTime      @default(now())
 
   @@index([listId])
+}
+
+model BoughtList {
+  id            String       @id @default(cuid())
+  name          String
+  location      String?
+  groceryListId String
+  groceryList   GroceryList  @relation(fields: [groceryListId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime     @default(now())
+  items         BoughtItem[]
+
+  @@index([userId])
+  @@index([groceryListId])
+}
+
+model BoughtItem {
+  id           String     @id @default(cuid())
+  name         String
+  category     String
+  price        Float?
+  boughtListId String
+  boughtList   BoughtList @relation(fields: [boughtListId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@index([boughtListId])
 }

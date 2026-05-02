@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,6 +35,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   createGroceryList,
@@ -47,12 +54,14 @@ const schema = z.object({
   name: z.string().trim().min(1, "Name is required").max(200, "Name is too long"),
 });
 type FormValues = z.infer<typeof schema>;
+type SortOption = "newest" | "oldest" | "name-asc" | "name-desc";
 
 export function GroceryListsPage() {
   const [lists, setLists] = useState<GroceryList[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [pendingDelete, setPendingDelete] = useState<GroceryList | null>(null);
+  const [sort, setSort] = useState<SortOption>("newest");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -74,6 +83,26 @@ export function GroceryListsPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const sortedLists = useMemo(() => {
+    return [...lists].sort((a, b) => {
+      switch (sort) {
+        case "oldest":
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "newest":
+        default:
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+      }
+    });
+  }, [lists, sort]);
 
   async function onCreate(values: FormValues) {
     try {
@@ -108,6 +137,20 @@ export function GroceryListsPage() {
             {lists.length}
           </Badge>
         ) : null}
+        <Select
+          value={sort}
+          onValueChange={(value) => setSort(value as SortOption)}
+        >
+          <SelectTrigger className="ml-auto w-[160px]" aria-label="Sort lists">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">Newest first</SelectItem>
+            <SelectItem value="oldest">Oldest first</SelectItem>
+            <SelectItem value="name-asc">Name A-Z</SelectItem>
+            <SelectItem value="name-desc">Name Z-A</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Card className="mt-4">
@@ -182,7 +225,7 @@ export function GroceryListsPage() {
           aria-label="Your grocery lists"
           className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {lists.map((list) => (
+          {sortedLists.map((list) => (
             <li key={list.id} className="relative">
               <Card className="h-full transition-colors hover:bg-accent/40">
                 <CardContent className="flex items-start gap-2 p-4">

@@ -258,6 +258,61 @@ describe("GroceriesPage", () => {
     );
     expect(within(list).queryByText("Spinach")).not.toBeInTheDocument();
   });
+
+  it("disables Grocery End until at least one item is bought", async () => {
+    const user = userEvent.setup();
+    setSessionToUser();
+    useAuthStore.setState({ user: null, status: "loading" });
+    render(
+      <TestRouter initialEntries={[listPath]}>
+        <App />
+      </TestRouter>
+    );
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: /test list/i })
+      ).toBeInTheDocument();
+    });
+
+    const endButton = screen.getByRole("button", { name: /grocery end/i });
+    expect(endButton).toBeDisabled();
+
+    await user.click(
+      screen.getByRole("checkbox", { name: /mark milk as bought/i })
+    );
+    expect(endButton).toBeEnabled();
+  });
+
+  it("moves bought items out of the grocery list when Grocery End is confirmed", async () => {
+    const user = userEvent.setup();
+    setSessionToUser();
+    useAuthStore.setState({ user: null, status: "loading" });
+    render(
+      <TestRouter initialEntries={[listPath]}>
+        <App />
+      </TestRouter>
+    );
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: /test list/i })
+      ).toBeInTheDocument();
+    });
+
+    await user.click(
+      screen.getByRole("checkbox", { name: /mark milk as bought/i })
+    );
+    await user.click(screen.getByRole("button", { name: /grocery end/i }));
+    const dialog = await screen.findByRole("alertdialog");
+    await user.type(within(dialog).getByLabelText(/location/i), "Corner Market");
+    await user.click(
+      within(dialog).getByRole("button", { name: /grocery end/i })
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText("Milk")).not.toBeInTheDocument();
+    });
+    expect(screen.getByText("Spinach")).toBeInTheDocument();
+  });
 });
 
 describe("GroceryList", () => {

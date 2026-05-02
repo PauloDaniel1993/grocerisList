@@ -5,6 +5,8 @@ import { RequireAdmin } from "./components/RequireAdmin";
 import { RequireAuth } from "./components/RequireAuth";
 import { AdminUserEditPage } from "./pages/AdminUserEditPage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
+import { BoughtListDetailPage } from "./pages/BoughtListDetailPage";
+import { BoughtListsPage } from "./pages/BoughtListsPage";
 import { LoginPage } from "./pages/LoginPage";
 import { GroceryListsPage } from "./pages/GroceryListsPage";
 import { GroceriesPage } from "./pages/GroceriesPage";
@@ -29,6 +31,11 @@ function AppRoutes() {
         <Route element={<AppLayout />}>
           <Route path="/grocery-lists" element={<GroceryListsPage />} />
           <Route path="/grocery-lists/:listId" element={<GroceriesPage />} />
+          <Route path="/bought-lists" element={<BoughtListsPage />} />
+          <Route
+            path="/bought-lists/:boughtListId"
+            element={<BoughtListDetailPage />}
+          />
           <Route path="/groceries" element={<Navigate to="/grocery-lists" replace />} />
           <Route path="/account/profile" element={<ProfilePage />} />
           <Route

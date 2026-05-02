@@ -46,6 +46,7 @@ export function AppLayout() {
 
   const navItems: NavItem[] = [
     { to: "/grocery-lists", label: "My lists", end: true },
+    { to: "/bought-lists", label: "Bought lists", end: true },
     { to: "/account/profile", label: "Profile", end: true },
   ];
   if (user.role === "admin") {

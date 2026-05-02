@@ -106,6 +106,24 @@ type GroceryItem = {
   bought: boolean
   createdAt: string
 }
+
+type BoughtList = {
+  id: string
+  name: string
+  location: string | null
+  groceryListId: string
+  createdAt: string
+  items?: BoughtItem[]
+}
+
+type BoughtItem = {
+  id: string
+  boughtListId: string
+  name: string
+  category: GroceryItem["category"]
+  price: number | null
+  createdAt: string
+}
 ```
 
 ### `GET /api/grocery-lists`
@@ -152,6 +170,45 @@ type GroceryItem = {
 - Error `404`: `{ "error": string }`
 
 Filtering (Slice 004) stays client-side over the loaded items; there is no filter query parameter.
+
+### `POST /api/grocery-lists/:listId/end-grocery`
+
+- Creates a new bought list from the current bought items, then deletes those bought items from the source grocery list.
+- Request: `{ "location"?: string }`
+- Success `201`: `{ "boughtList": BoughtList & { items: BoughtItem[] } }`
+- Error `400`: `{ "error": string }` when there are no bought items
+- Error `404`: `{ "error": string }`
+
+## Bought list contracts
+
+All bought-list endpoints require an authenticated session. Bought lists belong to the signed-in user; accessing another user’s bought list returns `404 { "error": string }`.
+
+### `GET /api/bought-lists`
+
+- Success `200`: `{ "boughtLists": (BoughtList & { items: BoughtItem[] })[] }` (newest first)
+
+### `GET /api/bought-lists/:boughtListId`
+
+- Success `200`: `{ "boughtList": BoughtList & { items: BoughtItem[] } }`
+- Error `404`: `{ "error": string }`
+
+### `PATCH /api/bought-lists/:boughtListId`
+
+- Request: `{ "location": string | null }`
+- Success `200`: `{ "boughtList": BoughtList & { items: BoughtItem[] } }`
+- Error `400` / `404`: `{ "error": string }`
+
+### `PATCH /api/bought-lists/:boughtListId/items/:itemId`
+
+- Request: `{ "price"?: number | null, "category"?: BoughtItem["category"] }` (at least one field)
+- Success `200`: `{ "item": BoughtItem }`
+- Error `400` / `404`: `{ "error": string }`
+
+### `DELETE /api/bought-lists/:boughtListId`
+
+- Deletes the bought list and all of its saved price records (cascade).
+- Success `204`: no body
+- Error `404`: `{ "error": string }`
 
 ### Legacy (not implemented)
 

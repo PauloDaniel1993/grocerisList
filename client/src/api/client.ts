@@ -1,5 +1,6 @@
 import type { GroceryList } from "../types/groceryList";
 import type { GroceryItem, GroceryCategory } from "../types/grocery";
+import type { BoughtItem, BoughtList } from "../types/boughtList";
 import type { User } from "../types/user";
 
 const jsonHeaders = { "Content-Type": "application/json" } as const;
@@ -215,4 +216,111 @@ export async function updateGroceryItemInList(
   }
   if (!body.item) throw new Error("Invalid response");
   return body.item;
+}
+
+export async function endGrocery(
+  listId: string,
+  input: { location?: string } = {}
+): Promise<BoughtList> {
+  const res = await fetch(`/api/grocery-lists/${listId}/end-grocery`, {
+    method: "POST",
+    credentials: "include",
+    headers: jsonHeaders,
+    body: JSON.stringify(input),
+  });
+  const body = (await readBody(res)) as {
+    boughtList?: BoughtList;
+    error?: string;
+  };
+  if (!res.ok) {
+    throw new Error(body?.error ?? "Request failed");
+  }
+  if (!body.boughtList) throw new Error("Invalid response");
+  return body.boughtList;
+}
+
+export async function updateBoughtListLocation(
+  id: string,
+  location: string | null
+): Promise<BoughtList> {
+  const res = await fetch(`/api/bought-lists/${id}`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: jsonHeaders,
+    body: JSON.stringify({ location }),
+  });
+  const body = (await readBody(res)) as {
+    boughtList?: BoughtList;
+    error?: string;
+  };
+  if (!res.ok) {
+    throw new Error(body?.error ?? "Request failed");
+  }
+  if (!body.boughtList) throw new Error("Invalid response");
+  return body.boughtList;
+}
+
+export async function getBoughtLists(): Promise<BoughtList[]> {
+  const res = await fetch("/api/bought-lists", { credentials: "include" });
+  const body = (await readBody(res)) as {
+    boughtLists?: BoughtList[];
+    error?: string;
+  };
+  if (!res.ok) {
+    throw new Error(body?.error ?? "Request failed");
+  }
+  if (!body.boughtLists) throw new Error("Invalid response");
+  return body.boughtLists;
+}
+
+export async function getBoughtList(id: string): Promise<BoughtList> {
+  const res = await fetch(`/api/bought-lists/${id}`, {
+    credentials: "include",
+  });
+  const body = (await readBody(res)) as {
+    boughtList?: BoughtList;
+    error?: string;
+  };
+  if (!res.ok) {
+    throw new Error(body?.error ?? "Request failed");
+  }
+  if (!body.boughtList) throw new Error("Invalid response");
+  return body.boughtList;
+}
+
+export async function updateBoughtItem(
+  boughtListId: string,
+  itemId: string,
+  data: { price?: number | null; category?: GroceryCategory }
+): Promise<BoughtItem> {
+  const res = await fetch(`/api/bought-lists/${boughtListId}/items/${itemId}`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: jsonHeaders,
+    body: JSON.stringify(data),
+  });
+  const body = (await readBody(res)) as { item?: BoughtItem; error?: string };
+  if (!res.ok) {
+    throw new Error(body?.error ?? "Request failed");
+  }
+  if (!body.item) throw new Error("Invalid response");
+  return body.item;
+}
+
+export async function updateBoughtItemPrice(
+  boughtListId: string,
+  itemId: string,
+  price: number | null
+): Promise<BoughtItem> {
+  return updateBoughtItem(boughtListId, itemId, { price });
+}
+
+export async function deleteBoughtList(id: string): Promise<void> {
+  const res = await fetch(`/api/bought-lists/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (res.status === 204) return;
+  const body = (await readBody(res)) as { error?: string };
+  throw new Error(body?.error ?? "Request failed");
 }

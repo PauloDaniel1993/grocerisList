@@ -1,7 +1,18 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { AlertCircle, ChevronLeft, FileQuestion } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { AlertCircle, ChevronLeft, FileQuestion, ShoppingBasket } from "lucide-react";
+import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,9 +22,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   createGroceryItemForList,
+  endGrocery,
   getGroceryItems,
   getGroceryList,
   updateGroceryItemInList,
@@ -80,11 +93,16 @@ function StatusCard({
 
 export function GroceriesPage() {
   const { listId } = useParams<{ listId: string }>();
+  const navigate = useNavigate();
   const [load, setLoad] = useState<LoadState>({ status: "loading" });
   const [listName, setListName] = useState("");
   const [items, setItems] = useState<GroceryItem[]>([]);
   const [filter, setFilter] = useState<GroceryFilterValue>("all");
+  const [confirmEndOpen, setConfirmEndOpen] = useState(false);
+  const [endingGrocery, setEndingGrocery] = useState(false);
+  const [endLocation, setEndLocation] = useState("");
   const visibleItems = filterGroceries(items, filter);
+  const boughtCount = items.filter((item) => item.bought).length;
 
   useEffect(() => {
     if (!listId) {
@@ -168,6 +186,27 @@ export function GroceriesPage() {
     setItems((prev) => prev.map((it) => (it.id === id ? updated : it)));
   }
 
+  async function handleEndGrocery() {
+    if (!listId || boughtCount === 0) return;
+    setEndingGrocery(true);
+    try {
+      const boughtList = await endGrocery(listId, { location: endLocation });
+      setItems((prev) => prev.filter((item) => !item.bought));
+      setConfirmEndOpen(false);
+      setEndLocation("");
+      toast.success("Bought list created", {
+        action: {
+          label: "View",
+          onClick: () => navigate(`/bought-lists/${boughtList.id}`),
+        },
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not end grocery");
+    } finally {
+      setEndingGrocery(false);
+    }
+  }
+
   return (
     <PageShell>
       <BackLink />
@@ -197,6 +236,71 @@ export function GroceriesPage() {
           onToggleBought={handleToggleBought}
         />
       </div>
+      <Card className="mt-4">
+        <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-medium">Ready to finish shopping?</p>
+            <p className="text-sm text-muted-foreground">
+              Move bought items into a dated bought list and remove them from this list.
+            </p>
+          </div>
+          <Button
+            type="button"
+            onClick={() => setConfirmEndOpen(true)}
+            disabled={boughtCount === 0 || endingGrocery}
+            className="sm:shrink-0"
+          >
+            <ShoppingBasket className="h-4 w-4" />
+            Grocery End
+          </Button>
+        </CardContent>
+      </Card>
+      <AlertDialog
+        open={confirmEndOpen}
+        onOpenChange={(open) => {
+          setConfirmEndOpen(open);
+          if (!open && !endingGrocery) setEndLocation("");
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>End this grocery trip?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Move {boughtCount} bought {boughtCount === 1 ? "item" : "items"} to
+              a new bought list and remove {boughtCount === 1 ? "it" : "them"} from
+              this grocery list.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <label
+              htmlFor="grocery-end-location"
+              className="text-sm font-medium text-foreground"
+            >
+              Location
+            </label>
+            <Input
+              id="grocery-end-location"
+              value={endLocation}
+              onChange={(event) => setEndLocation(event.target.value)}
+              maxLength={200}
+              placeholder="Store or market name"
+              disabled={endingGrocery}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={endingGrocery}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(event) => {
+                event.preventDefault();
+                void handleEndGrocery();
+              }}
+              disabled={endingGrocery || boughtCount === 0}
+            >
+              {endingGrocery ? "Ending..." : "Grocery End"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageShell>
   );
 }

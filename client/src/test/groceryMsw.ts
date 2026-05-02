@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { server } from "./mswServer";
 import type { GroceryItem } from "../types/grocery";
+import type { BoughtList } from "../types/boughtList";
 
 export const testListId = "test-list-1";
 const t = "2024-01-10T10:00:00.000Z";
@@ -42,10 +43,12 @@ const initial: GroceryItem[] = [
 
 let mockItems: GroceryItem[] = initial.map((i) => ({ ...i }));
 let listCounter = 0;
+let boughtListCounter = 0;
 
 function cloneState() {
   mockItems = initial.map((i) => ({ ...i }));
   listCounter = 0;
+  boughtListCounter = 0;
 }
 
 export function resetGroceryListMsw() {
@@ -108,6 +111,34 @@ function handlersForList(listId: string) {
         return HttpResponse.json({ item: next });
       }
     ),
+    http.post(`/api/grocery-lists/${listId}/end-grocery`, async ({ request }) => {
+      const body = (await request.json()) as { location?: string };
+      const boughtItems = mockItems.filter((item) => item.bought);
+      if (boughtItems.length === 0) {
+        return HttpResponse.json(
+          { error: "Cannot end grocery without bought items" },
+          { status: 400 }
+        );
+      }
+      const boughtListId = `bought-${boughtListCounter++}`;
+      const boughtList: BoughtList = {
+        id: boughtListId,
+        groceryListId: listId,
+        name: "Test list - 2024-01-10",
+        location: body.location?.trim() || null,
+        createdAt: t,
+        items: boughtItems.map((item, index) => ({
+          id: `bought-item-${index}`,
+          boughtListId,
+          name: item.name,
+          category: item.category,
+          price: null,
+          createdAt: t,
+        })),
+      };
+      mockItems = mockItems.filter((item) => !item.bought);
+      return HttpResponse.json({ boughtList }, { status: 201 });
+    }),
   ];
 }
 

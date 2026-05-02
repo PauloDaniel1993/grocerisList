@@ -4,6 +4,8 @@ import { prisma } from "../db.js";
 const password = "password123!";
 
 export async function resetAndSeedUsers() {
+  await prisma.boughtItem.deleteMany();
+  await prisma.boughtList.deleteMany();
   await prisma.groceryItem.deleteMany();
   await prisma.groceryList.deleteMany();
   await prisma.user.deleteMany();

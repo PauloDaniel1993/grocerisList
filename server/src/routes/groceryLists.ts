@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../db.js";
 import { requireAuth } from "../middleware/requireAuth.js";
-import type { GroceryItem, GroceryList } from "@prisma/client";
+import type { BoughtItem, BoughtList, GroceryItem, GroceryList } from "@prisma/client";
 
 export const groceryListsRouter = Router();
 
@@ -51,6 +51,46 @@ function toPublicItem(
     category: item.category,
     bought: item.bought,
     createdAt: item.createdAt.toISOString(),
+  };
+}
+
+function toPublicBoughtItem(
+  item: BoughtItem
+): {
+  id: string;
+  boughtListId: string;
+  name: string;
+  category: string;
+  price: number | null;
+  createdAt: string;
+} {
+  return {
+    id: item.id,
+    boughtListId: item.boughtListId,
+    name: item.name,
+    category: item.category,
+    price: item.price,
+    createdAt: item.createdAt.toISOString(),
+  };
+}
+
+function toPublicBoughtList(
+  list: BoughtList & { items?: BoughtItem[] }
+): {
+  id: string;
+  name: string;
+  location: string | null;
+  groceryListId: string;
+  createdAt: string;
+  items?: ReturnType<typeof toPublicBoughtItem>[];
+} {
+  return {
+    id: list.id,
+    name: list.name,
+    location: list.location,
+    groceryListId: list.groceryListId,
+    createdAt: list.createdAt.toISOString(),
+    ...(list.items ? { items: list.items.map(toPublicBoughtItem) } : {}),
   };
 }
 
@@ -135,6 +175,57 @@ groceryListsRouter.post("/:listId/items", async (req, res) => {
     },
   });
   res.status(201).json({ item: toPublicItem(item) });
+});
+
+groceryListsRouter.post("/:listId/end-grocery", async (req, res) => {
+  const userId = req.session.userId as string;
+  const { listId } = req.params;
+  const list = await prisma.groceryList.findFirst({
+    where: { id: listId, userId },
+  });
+  if (!list) {
+    res.status(404).json({ error: "List not found" });
+    return;
+  }
+  const boughtItems = await prisma.groceryItem.findMany({
+    where: { listId, bought: true },
+    orderBy: { createdAt: "asc" },
+  });
+  if (boughtItems.length === 0) {
+    res.status(400).json({ error: "Cannot end grocery without bought items" });
+    return;
+  }
+  const body = parseJsonRecord(req.body);
+  const location =
+    typeof body.location === "string" ? body.location.trim() : "";
+  if (location.length > 200) {
+    res.status(400).json({ error: "Location is too long" });
+    return;
+  }
+
+  const boughtList = await prisma.$transaction(async (tx) => {
+    const created = await tx.boughtList.create({
+      data: {
+        name: `${list.name} - ${new Date().toISOString().slice(0, 10)}`,
+        location: location || null,
+        groceryListId: list.id,
+        userId,
+        items: {
+          create: boughtItems.map((item) => ({
+            name: item.name,
+            category: item.category,
+          })),
+        },
+      },
+      include: { items: { orderBy: { createdAt: "asc" } } },
+    });
+    await tx.groceryItem.deleteMany({
+      where: { id: { in: boughtItems.map((item) => item.id) }, listId },
+    });
+    return created;
+  });
+
+  res.status(201).json({ boughtList: toPublicBoughtList(boughtList) });
 });
 
 groceryListsRouter.patch(
