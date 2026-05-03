@@ -12,6 +12,7 @@ export type GroceryItem = {
   name: string;
   category: GroceryCategory;
   bought: boolean;
+  price: number | null;
   createdAt: string;
 };
 
@@ -47,6 +48,7 @@ export function parseGroceryCategory(value: string): GroceryCategory {
 export type NewGroceryItemInput = {
   name: string;
   category: GroceryCategory;
+  value: number;
 };
 
 export type GroceryFilter = "all" | "active" | "bought";

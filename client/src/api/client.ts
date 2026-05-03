@@ -185,13 +185,13 @@ export async function getGroceryItems(listId: string): Promise<GroceryItem[]> {
 
 export async function createGroceryItemForList(
   listId: string,
-  input: { name: string; category: GroceryCategory }
+  input: { name: string; category: GroceryCategory; value: number }
 ): Promise<GroceryItem> {
   const res = await fetch(`/api/grocery-lists/${listId}/items`, {
     method: "POST",
     credentials: "include",
     headers: jsonHeaders,
-    body: JSON.stringify(input),
+    body: JSON.stringify({ name: input.name, category: input.category, price: input.value }),
   });
   const body = (await readBody(res)) as { item?: GroceryItem; error?: string };
   if (!res.ok) {

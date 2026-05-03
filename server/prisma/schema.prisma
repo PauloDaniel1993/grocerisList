@@ -37,6 +37,7 @@ model GroceryItem {
   name      String
   category  String
   bought    Boolean       @default(false)
+  price     Float?
   listId    String
   list      GroceryList   @relation(fields: [listId], references: [id], onDelete: Cascade)
   createdAt DateTime      @default(now())

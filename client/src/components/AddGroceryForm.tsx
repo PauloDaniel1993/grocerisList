@@ -7,6 +7,7 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -32,8 +33,22 @@ import {
 const defaultCategory: GroceryCategory = "other";
 
 const schema = z.object({
-  name: z.string().trim().min(1, "Name is required"),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required")
+    .max(100, "Name must be 100 characters or less")
+    .regex(/^[A-Za-z0-9]+$/, "Name can only contain letters and numbers"),
   category: z.enum(GROCERY_CATEGORIES as [GroceryCategory, ...GroceryCategory[]]),
+  value: z
+    .string()
+    .trim()
+    .min(1, "Price is required")
+    .regex(/^\d+(\.\d{1,2})?$/, "Enter a valid price (e.g. 1.99)")
+    .refine(
+      (val) => parseFloat(val) <= 10_000_000,
+      { message: "Price must be 10,000,000.00 or less" },
+    ),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -46,14 +61,14 @@ export function AddGroceryForm({ onAdd }: AddGroceryFormProps) {
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", category: defaultCategory },
+    defaultValues: { name: "", category: defaultCategory, value: "" },
     mode: "onSubmit",
   });
 
   async function onSubmit(values: FormValues) {
     try {
-      await onAdd({ name: values.name.trim(), category: values.category });
-      form.reset({ name: "", category: defaultCategory });
+      await onAdd({ name: values.name.trim(), category: values.category, value: parseFloat(values.value) });
+      form.reset({ name: "", category: defaultCategory, value: "" });
       nameInputRef.current?.focus();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not add this item");
@@ -66,7 +81,7 @@ export function AddGroceryForm({ onAdd }: AddGroceryFormProps) {
         onSubmit={form.handleSubmit(onSubmit)}
         noValidate
         aria-label="Add grocery item"
-        className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto_auto] sm:items-end sm:gap-3"
+        className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto_auto_auto] sm:items-end sm:gap-3"
       >
         <FormField
           control={form.control}
@@ -115,6 +130,25 @@ export function AddGroceryForm({ onAdd }: AddGroceryFormProps) {
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="value"
+          render={({ field }) => (
+            <FormItem className="space-y-1">
+              <FormLabel>Price</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  className="h-11 sm:w-28"
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

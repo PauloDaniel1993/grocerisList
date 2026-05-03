@@ -42,6 +42,7 @@ function toPublicItem(
   name: string;
   category: string;
   bought: boolean;
+  price: number | null;
   createdAt: string;
 } {
   return {
@@ -50,6 +51,7 @@ function toPublicItem(
     name: item.name,
     category: item.category,
     bought: item.bought,
+    price: item.price,
     createdAt: item.createdAt.toISOString(),
   };
 }
@@ -159,18 +161,40 @@ groceryListsRouter.post("/:listId/items", async (req, res) => {
     res.status(400).json({ error: "Name is required" });
     return;
   }
-  if (name.length > 200) {
+  if (name.length > 100) {
     res.status(400).json({ error: "Name is too long" });
+    return;
+  }
+  if (!/^[A-Za-z0-9]+$/.test(name)) {
+    res.status(400).json({ error: "Name can only contain letters and numbers" });
     return;
   }
   if (!isGroceryCategory(categoryRaw)) {
     res.status(400).json({ error: "Invalid category" });
     return;
   }
+  let price: number | null = null;
+  if (body.price !== undefined) {
+    if (typeof body.price !== "number" || !Number.isFinite(body.price)) {
+      res.status(400).json({ error: "Invalid price" });
+      return;
+    }
+    if (body.price < 0) {
+      res.status(400).json({ error: "Price must be positive" });
+      return;
+    }
+    if (body.price > 10_000_000) {
+      res.status(400).json({ error: "Price is too high" });
+      return;
+    }
+    const rounded = Math.round(body.price * 100) / 100;
+    price = rounded;
+  }
   const item = await prisma.groceryItem.create({
     data: {
       name,
       category: categoryRaw,
+      price,
       listId,
     },
   });
@@ -266,8 +290,12 @@ groceryListsRouter.patch(
         res.status(400).json({ error: "Name cannot be empty" });
         return;
       }
-      if (trimmed.length > 200) {
+      if (trimmed.length > 100) {
         res.status(400).json({ error: "Name is too long" });
+        return;
+      }
+      if (!/^[A-Za-z0-9]+$/.test(trimmed)) {
+        res.status(400).json({ error: "Name can only contain letters and numbers" });
         return;
       }
       data.name = trimmed;
