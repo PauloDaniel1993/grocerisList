@@ -57,6 +57,10 @@ adminUsersRouter.patch("/:userId", requireAdmin, async (req, res) => {
       res.status(400).json({ error: "Invalid role" });
       return;
     }
+    if (userId === req.session.userId && body.role !== "admin") {
+      res.status(400).json({ error: "Cannot change your own role" });
+      return;
+    }
     data.role = body.role;
   }
   if (Object.keys(data).length === 0) {

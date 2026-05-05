@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { filterPricePointsByLocalDate } from "../filterPricePointsByLocalDate";
+import {
+  filterPricePointsByLocalDate,
+  validateDateRange,
+} from "../filterPricePointsByLocalDate";
 import type { PricePoint } from "../../types/priceHistory";
 
 describe("filterPricePointsByLocalDate", () => {
@@ -45,5 +48,52 @@ describe("filterPricePointsByLocalDate", () => {
       },
     ];
     expect(filterPricePointsByLocalDate(row, "", "2020-12-31")).toHaveLength(0);
+  });
+});
+
+describe("validateDateRange", () => {
+  it("returns null when both fields are empty", () => {
+    expect(validateDateRange("", "")).toBeNull();
+    expect(validateDateRange("   ", "")).toBeNull();
+  });
+
+  it("returns null when only from is filled with a valid date", () => {
+    expect(validateDateRange("2024-06-01", "")).toBeNull();
+    expect(validateDateRange("2024-06-01", "   ")).toBeNull();
+  });
+
+  it("returns null when only to is filled with a valid date", () => {
+    expect(validateDateRange("", "2024-06-01")).toBeNull();
+    expect(validateDateRange("   ", "2024-06-01")).toBeNull();
+  });
+
+  it("returns error for invalid from date", () => {
+    expect(validateDateRange("not-a-date", "")).toBe("Invalid From date");
+    expect(validateDateRange("2024-13-01", "")).toBe("Invalid From date");
+    expect(validateDateRange("2024-02-30", "")).toBe("Invalid From date");
+  });
+
+  it("returns error for invalid to date", () => {
+    expect(validateDateRange("", "not-a-date")).toBe("Invalid To date");
+    expect(validateDateRange("", "2024-13-01")).toBe("Invalid To date");
+    expect(validateDateRange("", "2024-02-30")).toBe("Invalid To date");
+  });
+
+  it("returns error when to is before from", () => {
+    expect(validateDateRange("2024-06-15", "2024-06-01")).toBe(
+      "To date must be on or after From date"
+    );
+    expect(validateDateRange("2025-01-01", "2024-12-31")).toBe(
+      "To date must be on or after From date"
+    );
+  });
+
+  it("returns null when to equals from", () => {
+    expect(validateDateRange("2024-06-01", "2024-06-01")).toBeNull();
+  });
+
+  it("returns null when to is after from", () => {
+    expect(validateDateRange("2024-06-01", "2024-06-15")).toBeNull();
+    expect(validateDateRange("2024-12-31", "2025-01-01")).toBeNull();
   });
 });

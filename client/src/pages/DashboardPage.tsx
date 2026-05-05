@@ -12,7 +12,10 @@ import {
 import { AlertCircle, LineChart as LineChartIcon } from "lucide-react";
 
 import { getPriceHistory } from "@/api/client";
-import { filterPricePointsByLocalDate } from "@/lib/filterPricePointsByLocalDate";
+import {
+  filterPricePointsByLocalDate,
+  validateDateRange,
+} from "@/lib/filterPricePointsByLocalDate";
 import { ProductAutocomplete } from "@/components/ProductAutocomplete";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -80,12 +83,24 @@ export function DashboardPage() {
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [dateError, setDateError] = useState<string | null>(null);
   const [points, setPoints] = useState<PricePoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  const handleFromChange = (value: string) => {
+    setFrom(value);
+    setDateError(validateDateRange(value, to));
+  };
+
+  const handleToChange = (value: string) => {
+    setTo(value);
+    setDateError(validateDateRange(from, value));
+  };
+
   const loadChart = useCallback(async () => {
+    setDateError(null);
     setValidationError(null);
     setError(null);
     if (category === "all" && !product.trim()) {
@@ -215,8 +230,20 @@ export function DashboardPage() {
                     id="dash-from"
                     type="date"
                     value={from}
-                    onChange={(e) => setFrom(e.target.value)}
-                    className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    onChange={(e) => handleFromChange(e.target.value)}
+                    aria-invalid={
+                      dateError !== null &&
+                      dateError.startsWith("Invalid From")
+                        ? true
+                        : undefined
+                    }
+                    className={`h-11 w-full rounded-md border px-3 py-2 text-sm shadow-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                      dateError !== null &&
+                      (dateError.startsWith("Invalid From") ||
+                        dateError.includes("after From"))
+                        ? "border-destructive"
+                        : "border-input"
+                    } bg-background`}
                   />
                 </div>
                 <div className="min-w-0 space-y-2 sm:w-[11.25rem]">
@@ -225,8 +252,20 @@ export function DashboardPage() {
                     id="dash-to"
                     type="date"
                     value={to}
-                    onChange={(e) => setTo(e.target.value)}
-                    className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    onChange={(e) => handleToChange(e.target.value)}
+                    aria-invalid={
+                      dateError !== null &&
+                      dateError.startsWith("Invalid To")
+                        ? true
+                        : undefined
+                    }
+                    className={`h-11 w-full rounded-md border px-3 py-2 text-sm shadow-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                      dateError !== null &&
+                      (dateError.startsWith("Invalid To") ||
+                        dateError.includes("after From"))
+                        ? "border-destructive"
+                        : "border-input"
+                    } bg-background`}
                   />
                 </div>
               </div>
@@ -244,6 +283,11 @@ export function DashboardPage() {
             <p className="text-xs leading-relaxed text-muted-foreground">
               Leave From and To empty to show every purchase date in the chart.
             </p>
+            {dateError ? (
+              <p className="text-sm text-destructive" role="alert">
+                {dateError}
+              </p>
+            ) : null}
           </div>
 
           {validationError ? (

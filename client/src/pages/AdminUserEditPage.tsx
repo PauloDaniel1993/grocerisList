@@ -6,6 +6,7 @@ import { z } from "zod";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import * as api from "@/api/client";
+import { useAuthStore } from "@/stores/authStore";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -56,6 +57,8 @@ function LoadingShell() {
 export function AdminUserEditPage() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const currentUser = useAuthStore((s) => s.user);
+  const refreshUser = useAuthStore((s) => s.refreshUser);
   const [loading, setLoading] = useState(true);
   const [originalName, setOriginalName] = useState("");
 
@@ -110,7 +113,11 @@ export function AdminUserEditPage() {
         role: values.role,
       });
       toast.success("User updated");
-      navigate("/admin/users");
+      if (currentUser?.id === userId) {
+        await refreshUser();
+      }
+      const isSelfDemoted = currentUser?.id === userId && values.role === "user";
+      navigate(isSelfDemoted ? "/dashboard" : "/admin/users");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save");
     }
